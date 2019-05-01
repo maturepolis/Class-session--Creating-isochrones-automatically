@@ -1,0 +1,206 @@
+print('---------------------')
+## importing library
+import processing
+
+## Loading source layers
+point_path = '.../Class_session/Layers/Songpa_elementary_schools.shp'
+line_path = '.../Class_session/Layers/Songpa_network.shp'
+point_project = iface.addVectorLayer(point_path, "Songpa_elementary_schools", "ogr")
+line_project = iface.addVectorLayer(line_path, "Songpa_network", "ogr")
+
+## Calling source layers
+point_layer = QgsProject.instance().mapLayersByName('Songpa_elementary_schools')[0]
+line_layer = QgsProject.instance().mapLayersByName('Songpa_network')[0]
+
+## Extracting field names and types from POI points
+point_field_names = [field.name() for field in point_layer.fields()]
+point_first_feature_selection = point_layer.selectByIds([0])
+point_first_feature = point_layer.selectedFeatures()[0]
+point_value = point_first_feature.attributes()
+point_type = [str(type(value)) for value in point_value]
+point_field_types = []
+for type in point_type:
+    if type == "<class 'int'>":
+        point_field_types.append(0)
+    elif type == "<class 'float'>":
+        point_field_types.append(1)
+    elif type == "<class 'str'>":
+        point_field_types.append(2)
+    else:
+        point_field_types.append(2)
+print('extract node data')
+
+## Calling algorithm parameters of v.net.iso
+alg_iso = 'grass7:v.net.iso'
+threshold = 10
+arc_type = '0, 1'
+center_cats = '1-100000'
+costs = '750'
+arc_column = 'TTW_O'
+arc_backward_column = 'TTW_O'
+node_column = None
+g = None
+output_iso = 'Network_Iso'
+extent = None
+snap = -1
+min_area = 0.000100
+output_type = 0
+dsco = None
+ico = None
+
+## Calling algorithm parameters of buffer
+alg_buffer = 'qgis:buffer'
+distance = 1000
+segments = 5
+end_cap = 0
+join_style = 0
+miter_limit = 2.0
+dissolve = False
+output_buffer = '.../Class_session/Temporary/buffer.shp'
+
+## Calling algorithm parameters of select by location
+alg_select = 'qgis:selectbylocation'
+predicate = 0
+method = 0
+print('finish calling parameters')
+
+## Setting initial number
+num = 1
+
+## starting creating isochrones
+
+## Calling POI point one by one
+for feat in point_layer.getFeatures():
+    ## Extracting field values of POI point
+    value_list = feat.attributes()
+    print(value_list[2])
+    ## Extracting feature id
+    id = feat.id()
+    ## Saving feature as temporary layer
+    temporary_path = '.../Class_session/Temporary/temporary_node.shp'
+    temporary_node = point_layer.selectByIds([id])
+    temporary_layer = point_layer.selectedFeatures()
+    temporary_writer = QgsVectorFileWriter.writeAsVectorFormat(point_layer, temporary_path, "UTF-8", point_layer.crs(), "ESRI Shapefile", True)
+    print('finish temporary node')
+    ## Creating a buffer from point
+    ret_buffer = processing.run(alg_buffer, {"INPUT": temporary_path, \
+                                             "DISTANCE": distance, \
+                                             "SEGMENTS": segments, \
+                                             "END_CAP_STYLE": end_cap, \
+                                             "JOIN_STYLE": join_style, \
+                                             "MITER_LIMIT": miter_limit, \
+                                             "DISSOLVE": dissolve, \
+                                             "OUTPUT": output_buffer},)
+    print('finish buffer')
+    ## Loading a buffer layer
+    buffer_poject = iface.addVectorLayer(output_buffer, "buffer", "ogr")
+    buffer_layer = QgsProject.instance().mapLayersByName('buffer')[0]
+
+    ## Running select by location
+    intersect = buffer_layer
+    ret_select = processing.run(alg_select, {"INPUT": line_layer, \
+                                             "PREDICATE": predicate, \
+                                             "INTERSECT": intersect, \
+                                             "METHOD": method})
+    print('finish selection')
+    ## Saving selected lines
+    selected_path = '.../Class_session/Temporary/selected.shp'
+    selected_writer = QgsVectorFileWriter.writeAsVectorFormat(line_layer, selected_path, "UTF-8", line_layer.crs(), "ESRI Shapefile", True)
+    print('finish saving selection')
+    ## Strating running v.net.iso and saving the result
+    output_name = '.../Class_session/Output/#1/Original/' + value_list[2] + '_original.shp'
+
+    ret_iso = processing.run(alg_iso, {"input": selected_path, \
+                               "points": temporary_path, \
+                               "threshold": threshold, \
+                               "arc_type": arc_type, \
+                               "center_cats": center_cats, \
+                               "costs": costs, \
+                               "arc_column": arc_column, \
+                               "arc_backward_column": arc_backward_column, \
+                               "node_column": node_column, \
+                               "-g": g, \
+                               "output": output_iso, \
+                               "GRASS_REGION_PARAMETER": extent, \
+                               "GRASS_SNAP_TOLERANCE_PARAMETER": snap, \
+                               "GRASS_MIN_AREA_PARAMETER": min_area, \
+                               "GRASS_OUTPUT_TYPE_PARAMETER": output_type, \
+                               "GRASS_VECTOR_DSCO": dsco, \
+                               "GRASS_VECTOR_LCO": ico, \
+                               "output": output_name})
+    print('finish iso')
+    ## Calling the output of v.net.iso
+    original_path = ret_iso["output"]
+    original_layer = iface.addVectorLayer(original_path, value_list[2] + '_original', "ogr")
+    original_iso = QgsProject.instance().mapLayersByName(value_list[2] + '_original')[0]
+
+    ## Starting filtering isochroned
+
+    ## Calling the original output of v.net.iso and saving as a new layer
+    filtered_path = '.../Class_session/Output/#1/Filtered/' + value_list[2] + '_filtered.shp'
+    filtered_writer = QgsVectorFileWriter.writeAsVectorFormat(original_iso, \
+                                                              filtered_path, "UTF-8", line_layer.crs(),
+                                                              "ESRI Shapefile")
+
+    ## Filtering isochrones
+    filtered_layer = iface.addVectorLayer(filtered_path, value_list[2] + '_filtered', "ogr")
+    filtered_layer.startEditing()
+    req = filtered_layer.selectByExpression('"cat"=2')
+    Feat = filtered_layer.selectedFeatures()
+    IDlist = [feat.id() for feat in Feat]
+    filtered_layer.dataProvider().deleteFeatures(IDlist)
+    filtered_layer.commitChanges()
+    print('finish filtering')
+    
+    ## Starting merging isochrones lines with dissolve tool
+    merged_path = '.../Class_session/Output/#1/Merged/' + value_list[2] + '_merged.shp'
+    processing.run('qgis:dissolve', {"INPUT": filtered_layer, "FIELD": None, "OUTPUT": merged_path})
+    print('finish merging')
+    
+    ## Starting Adding field data from a POI point
+
+    ## Calling merged isochrone layer
+    merged_layer = iface.addVectorLayer(merged_path, value_list[2] + '_merged', 'ogr')
+    merged_layer.startEditing()
+    ## Adding first field data (field name, field type, field value)
+    ret2 = processing.run('qgis:addfieldtoattributestable', {"INPUT": merged_layer, "FIELD_NAME": point_field_names[0], \
+                                                             "FIELD_TYPE": point_field_types[0], "FIELD_LENGTH": 10,
+                                                             "FIELD_PRECISION": 0, \
+                                                             "OUTPUT": "memory:'first_field_output'"})
+    ret2_output = ret2["OUTPUT"]
+    ret2_output.startEditing()
+    ret2_output.changeAttributeValue(1, 1, value_list[0])
+    ret2_output.commitChanges()
+    
+    ## Adding rest field data
+    for i in range(1, field_length):
+        ret2 = processing.run('qgis:addfieldtoattributestable',
+                              {"INPUT": ret2_output, "FIELD_NAME": point_field_names[i],
+                               "FIELD_TYPE": point_field_types[i], "FIELD_LENGTH": 10, "FIELD_PRECISION": 0, \
+                               "OUTPUT": "memory:'field_output'"})
+        ret2_output = ret2["OUTPUT"]
+        ret2_output.startEditing()
+        ret2_output.changeAttributeValue(1, i + 1, value_list[i])
+        ret2_output.commitChanges()
+
+    ## Saving final output layer
+    final_path = '.../Class_session/Output/#1/Final/' + value_list[2] + '_final.shp'
+    final_writer = QgsVectorFileWriter.writeAsVectorFormat(ret2_output, final_path, "UTF-8", original_iso.crs(),
+                                                           "ESRI Shapefile")
+    print('finish updating field')
+    
+    ## Removing layers on projection map
+    QgsProject.instance().removeMapLayer(original_layer.id())
+    QgsProject.instance().removeMapLayer(filtered_layer.id())
+    QgsProject.instance().removeMapLayer(merged_layer.id())
+    QgsProject.instance().removeMapLayer(buffer_layer.id())
+    print('finish removing layers')
+    
+    ## Printing processing finish and adding 1 to file number
+    print('#' + str(num) + '_'+ value_list[2] + ' Done')
+    num += 1
+
+print('Finish!')
+
+QgsProject.instance().removeMapLayer(point_layer.id())
+QgsProject.instance().removeMapLayer(line_layer.id())
