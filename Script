@@ -28,6 +28,7 @@ for type in point_type:
         point_field_types.append(2)
     else:
         point_field_types.append(2)
+field_length = len(point_field_types)
 print('extract node data')
 
 ## Calling algorithm parameters of v.net.iso
