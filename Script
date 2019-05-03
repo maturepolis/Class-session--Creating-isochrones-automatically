@@ -162,7 +162,7 @@ for feat in point_layer.getFeatures():
     
     ## Starting merging isochrones lines with dissolve tool
     merged_path = '.../Class_session/Output/#1/Merged/' + value_list[2] + '_merged.shp'
-    processing.run(, {"INPUT": filtered_layer, "FIELD": None, "OUTPUT": merged_path})
+    
     print('finish merging')
     
     ## Starting Adding field data from a POI point
