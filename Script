@@ -99,7 +99,7 @@ for feat in point_layer.getFeatures():
     
     ## Loading a buffer layer
     buffer_poject = iface.addVectorLayer(output_buffer, "buffer", "ogr")
-    buffer_layer = QgsProject.instance().mapLayersByName('buffer')[0]
+    buffer_layer = ('buffer')[0]
 
     ## Running select by location
     intersect = buffer_layer
