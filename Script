@@ -103,15 +103,15 @@ for feat in point_layer.getFeatures():
 
     ## Running select by location
     intersect = buffer_layer
-    ret_select = processing.run(alg_select, {"INPUT": line_layer, \
-                                             "PREDICATE": predicate, \
-                                             "INTERSECT": intersect, \
-                                             "METHOD": method})
+    ret_select = processing.run(alg_select, {: line_layer, \
+                                             : predicate, \
+                                             : intersect, \
+                                             : method})
     print('finish selection')
     
     ## Saving selected lines
     selected_path = '.../Class_session/Temporary/selected.shp'
-    selected_writer = QgsVectorFileWriter.writeAsVectorFormat(line_layer, selected_path, , line_layer.crs(), "ESRI Shapefile", True)
+    selected_writer = QgsVectorFileWriter.writeAsVectorFormat(line_layer, selected_path, , , "ESRI Shapefile", True)
     print('finish saving selection')
     
     ## Strating running v.net.iso and saving the result
@@ -170,6 +170,7 @@ for feat in point_layer.getFeatures():
     ## Calling merged isochrone layer
     merged_layer = iface.addVectorLayer(merged_path, value_list[2] + '_merged', 'ogr')
     merged_layer.startEditing()
+    
     ## Adding first field data (field name, field type, field value)
     ret2 = processing.run('qgis:addfieldtoattributestable', {"INPUT": merged_layer, "FIELD_NAME": point_field_names[0], \
                                                              "FIELD_TYPE": point_field_types[0], "FIELD_LENGTH": 10,
