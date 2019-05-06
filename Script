@@ -6,7 +6,7 @@ import processing
 point_path = '.../Class_session/Layers/Songpa_elementary_schools.shp'
 line_path = '.../Class_session/Layers/Songpa_network.shp'
 point_project = iface.addVectorLayer(point_path, "Songpa_elementary_schools", "ogr")
-line_project = (line_path, , "ogr")
+line_project = 
 
 ## Calling source layers
 point_layer = QgsProject.instance().mapLayersByName('Songpa_elementary_schools')[0]
