@@ -6,11 +6,11 @@ import processing
 point_path = '.../Class_session/Layers/Songpa_elementary_schools.shp'
 line_path = '.../Class_session/Layers/Songpa_network.shp'
 point_project = iface.addVectorLayer(point_path, "Songpa_elementary_schools", "ogr")
-line_project = 
+line_project = #################
 
 ## Calling source layers
 point_layer = QgsProject.instance().mapLayersByName('Songpa_elementary_schools')[0]
-line_layer = 
+line_layer = #################
 
 ## Extracting field names and types from POI points
 point_field_names = [field.name() for field in point_layer.fields()]
@@ -36,27 +36,27 @@ alg_iso = 'grass7:v.net.iso'
 threshold = 10
 arc_type = '0, 1'
 center_cats = '1-100000'
-costs = 
+costs = ######
 arc_column = 'TTW_O'
 arc_backward_column = 'TTW_O'
-node_column = 
+node_column = ######
 g = None
 output_iso = 'Network_Iso'
 extent = None
-snap = 
-min_area = 
+snap = ######
+min_area = ######
 output_type = 0
 dsco = None
 ico = None
 
 ## Calling algorithm parameters of buffer
 alg_buffer = 'qgis:buffer'
-distance = 
-segments = 
-end_cap = 
-join_style = 
-miter_limit = 
-dissolve = 
+distance = ######
+segments = ######
+end_cap = ######
+join_style = ######
+miter_limit = ######
+dissolve = ######
 output_buffer = '.../Class_session/Temporary/buffer.shp'
 
 ## Calling algorithm parameters of select by location
@@ -103,15 +103,15 @@ for feat in point_layer.getFeatures():
 
     ## Running select by location
     intersect = buffer_layer
-    ret_select = processing.run(alg_select, {: line_layer, \
-                                             : predicate, \
-                                             : intersect, \
-                                             : method})
+    ret_select = processing.run(alg_select, {######: line_layer, \
+                                             ######: predicate, \
+                                             ######: intersect, \
+                                             ######: method})
     print('finish selection')
     
     ## Saving selected lines
     selected_path = '.../Class_session/Temporary/selected.shp'
-    selected_writer = QgsVectorFileWriter.writeAsVectorFormat(line_layer, selected_path, , , "ESRI Shapefile", True)
+    selected_writer = QgsVectorFileWriter.writeAsVectorFormat(line_layer, selected_path, ######, ######, "ESRI Shapefile", True)
     print('finish saving selection')
     
     ## Strating running v.net.iso and saving the result
@@ -148,13 +148,13 @@ for feat in point_layer.getFeatures():
     filtered_path = '.../Class_session/Output/#1/Filtered/' + value_list[2] + '_filtered.shp'
     filtered_writer = QgsVectorFileWriter.writeAsVectorFormat(original_iso, \
                                                               filtered_path, "UTF-8", line_layer.crs(),
-                                                              )
+                                                              ######)
 
     ## Filtering isochrones
     filtered_layer = iface.addVectorLayer(filtered_path, value_list[2] + '_filtered', "ogr")
     filtered_layer.startEditing()
     req = filtered_layer.selectByExpression('"cat"=2')
-    Feat = 
+    Feat = ############
     IDlist = [feat.id() for feat in Feat]
     filtered_layer.dataProvider().deleteFeatures(IDlist)
     filtered_layer.commitChanges()
@@ -162,7 +162,7 @@ for feat in point_layer.getFeatures():
     
     ## Starting merging isochrones lines with dissolve tool
     merged_path = '.../Class_session/Output/#1/Merged/' + value_list[2] + '_merged.shp'
-    
+    ##############################
     print('finish merging')
     
     ## Starting Adding field data from a POI point
@@ -177,7 +177,7 @@ for feat in point_layer.getFeatures():
                                                              "FIELD_PRECISION": 0, \
                                                              "OUTPUT": "memory:'first_field_output'"})
     ret2_output = ret2["OUTPUT"]
-    
+    #########################
     ret2_output.changeAttributeValue(1, 1, value_list[0])
     ret2_output.commitChanges()
     
@@ -194,22 +194,22 @@ for feat in point_layer.getFeatures():
 
     ## Saving final output layer
     final_path = '.../Class_session/Output/#1/Final/' + value_list[2] + '_final.shp'
-    final_writer = (ret2_output, final_path, "UTF-8", original_iso.crs(),
+    final_writer = #################(ret2_output, final_path, "UTF-8", original_iso.crs(),
                                                            "ESRI Shapefile")
     print('finish updating field')
     
     ## Removing layers on projection map
     QgsProject.instance().removeMapLayer(original_layer.id())
     QgsProject.instance().removeMapLayer(filtered_layer.id())
-    
-    
+    ########################
+    ########################
     print('finish removing layers')
     
     ## Printing processing finish and adding 1 to file number
     print('#' + str(num) + '_'+ value_list[2] + ' Done')
     num += 1
 
-
-
+######################
+######################
 
 print('Finish!')
