@@ -61,8 +61,8 @@ output_buffer = '.../Class_session/Temporary/buffer.shp'
 
 ## Calling algorithm parameters of select by location
 alg_select = 'qgis:selectbylocation'
-predicate = 
-method = 
+predicate = 0
+method = 0
 print('finish calling parameters')
 
 ## Setting initial number
