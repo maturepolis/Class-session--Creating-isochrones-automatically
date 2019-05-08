@@ -36,27 +36,27 @@ alg_iso = 'grass7:v.net.iso'
 threshold = 10
 arc_type = '0, 1'
 center_cats = '1-100000'
-costs = ######
+costs = '750'
 arc_column = 'TTW_O'
 arc_backward_column = 'TTW_O'
-node_column = ######
+node_column = None
 g = None
 output_iso = 'Network_Iso'
 extent = None
-snap = ######
-min_area = ######
+snap = -1
+min_area = 0.000100
 output_type = 0
 dsco = None
 ico = None
 
 ## Calling algorithm parameters of buffer
 alg_buffer = 'qgis:buffer'
-distance = ######
-segments = ######
-end_cap = ######
-join_style = ######
-miter_limit = ######
-dissolve = ######
+distance = 1000
+segments = 5
+end_cap = 0
+join_style = 0
+miter_limit = 2.0
+dissolve = False
 output_buffer = '.../Class_session/Temporary/buffer.shp'
 
 ## Calling algorithm parameters of select by location
