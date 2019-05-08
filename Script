@@ -103,10 +103,10 @@ for feat in point_layer.getFeatures():
 
     ## Running select by location
     intersect = buffer_layer
-    ret_select = processing.run(alg_select, {######: line_layer, \
-                                             ######: predicate, \
-                                             ######: intersect, \
-                                             ######: method})
+    ret_select = processing.run(alg_select, {"INPUT": line_layer, \
+                                             "PREDICATE": predicate, \
+                                             "INTERSECTION": intersect, \
+                                             "METHOD": method})
     print('finish selection')
     
     ## Saving selected lines
